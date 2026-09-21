@@ -49,7 +49,7 @@ npm install @reduxjs/toolkit react-redux
 import { configureStore } from "@reduxjs/toolkit";
 import counterReducer from "./features/counter/counterSlice";
 
-export const store = configureStore({
+export const store = configureStore({ // store export kore main tsx e add korte hoy
   reducer: {
     counter: counterReducer,
   },
