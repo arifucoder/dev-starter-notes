@@ -49,7 +49,7 @@ npm install @reduxjs/toolkit react-redux
 import { configureStore } from "@reduxjs/toolkit";
 import counterReducer from "./features/counter/counterSlice";
 
-export const store = configureStore({ // store export kore main tsx e add korte hoy
+export const store = configureStore({
   reducer: {
     counter: counterReducer,
   },
@@ -190,14 +190,19 @@ export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
 
 ## ৯. Component থেকে Dispatch করা (`App.tsx`)
 
+এখানে দুইভাবে লেখা যায় — একটা **custom hook দিয়ে (recommended)**, আরেকটা **সরাসরি react-redux এর hook দিয়ে**। দুটোর পার্থক্যটা বোঝা জরুরি।
+
+### ✅ ভার্সন ১: Custom Hook দিয়ে (recommended)
+
+যেহেতু `redux/hook.ts` এ আগে থেকেই `useAppSelector = useSelector.withTypes<RootState>()` লিখে টাইপ বসিয়ে দেওয়া হয়েছে, তাই এখানে **আবার নতুন করে `(state: RootState) => ...` লেখার দরকার নেই**। টাইপ এমনিতেই বসে যাবে।
+
 ```tsx
 import { decrement, increment } from "./redux/features/counter/counterSlice";
-import type { RootState } from "./redux/store";
 import { useAppDispatch, useAppSelector } from "./redux/hook";
 
 function App() {
   const dispatch = useAppDispatch();
-  const { count } = useAppSelector((state: RootState) => state.counter);
+  const { count } = useAppSelector((state) => state.counter); // ✅ RootState লেখা লাগবে না, hook টা আগে থেকেই typed
 
   const handleIncrement = () => {
     dispatch(increment()); // ⚠️ ফাংশনটা obossoi call করতে হবে — শুধু "increment" লিখলে কাজ করবে না
@@ -231,9 +236,44 @@ function App() {
 export default App;
 ```
 
+### ⚙️ ভার্সন ২: Custom Hook ছাড়া (plain `useSelector`/`useDispatch`)
+
+Custom hook বানানো না হলে সরাসরি `react-redux` থেকে `useSelector`, `useDispatch` ইম্পোর্ট করতে হয়। এক্ষেত্রে TypeScript নিজে থেকে `state` এর টাইপ বুঝতে পারে না, তাই **ম্যানুয়ালি `RootState` টাইপ লিখে দিতে হয়**:
+
+```tsx
+import { useDispatch, useSelector } from "react-redux";
+import { decrement, increment } from "./redux/features/counter/counterSlice";
+import type { RootState, AppDispatch } from "./redux/store";
+
+function App() {
+  const dispatch = useDispatch<AppDispatch>();
+  const { count } = useSelector((state: RootState) => state.counter); // ⚠️ এখানে RootState ম্যানুয়ালি লিখতেই হবে
+
+  const handleIncrement = () => {
+    dispatch(increment());
+  };
+  const handleDecrement = () => {
+    dispatch(decrement());
+  };
+
+  return (
+    <div>
+      <h1>Counter</h1>
+      <div className="flex justify-center items-center gap-4">
+        <button onClick={handleIncrement}>Increment</button>
+        <div className="text-xl">{count}</div>
+        <button onClick={handleDecrement}>Decrement</button>
+      </div>
+    </div>
+  );
+}
+
+export default App;
+```
+
 **খেয়াল রাখার বিষয়:**
-- `useAppSelector` দিয়ে store থেকে দরকারি state (এখানে `count`) বের করে আনা হয়।
-- `useAppDispatch` দিয়ে action dispatch করার ফাংশন পাওয়া যায়।
+- `useAppSelector`/`useAppDispatch` (custom hook) ব্যবহার করলে টাইপ আগে থেকেই বসানো থাকে, তাই component ফাইলে বারবার `RootState`/`AppDispatch` import বা annotation করার দরকার নেই — এটাই মূল সুবিধা।
+- Plain `useSelector`/`useDispatch` ব্যবহার করলে প্রতিটা জায়গায় `(state: RootState) => ...` এবং `useDispatch<AppDispatch>()` লিখে টাইপ ম্যানুয়ালি বলে দিতে হয়।
 - `dispatch(increment())` — এখানে `increment()` কে অবশ্যই **কল** করতে হবে (bracket `()` সহ)। শুধু `dispatch(increment)` লিখলে কাজ করবে না — এটা খুবই কমন একটা ভুল।
 
 ---
