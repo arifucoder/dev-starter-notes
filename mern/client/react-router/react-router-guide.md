@@ -72,7 +72,7 @@ createRoot(document.getElementById("root")!).render(
 );
 ```
 
-খেয়াল রাখতে হবে — **`RouterProvider`-কে অবশ্যই Redux-এর `Provider`-এর ভেতরে (child হিসেবে) বসাতে হবে**, বাইরে না। কারণ `RouterProvider` দিয়ে যত page/component render হবে (menu, layout, সব route-এর সব component), সেগুলো সবই `Provider`-এর ভিতরে থাকলে তবেই Redux store পুরোপুরি (full power নিয়ে) access করতে পারবে — অর্থাৎ যেকোনো page/component থেকে `useSelector`, `useDispatch` ঠিকভাবে কাজ করবে। `RouterProvider`-কে `Provider`-এর বাইরে বসালে ভিতরের কোনো page/component Redux store access করতে পারবে না।
+খেয়াল রাখতে হবে — **`RouterProvider`-কে অবশ্যই Redux-এর `Provider`-এর ভেতরে (child হিসেবে) বসাতে হবে**, বাইরে না। কারণ `RouterProvider` দিয়ে যত page/component render হবে (menu, layout, সব route-এর সব component), সেগুলো সবই `Provider`-এর ভিতরে থাকলে তবেই Redux store পুরোপুরি access করতে পারবে — অর্থাৎ যেকোনো page/component থেকে `useSelector`, `useDispatch` ঠিকভাবে কাজ করবে। `RouterProvider`-কে `Provider`-এর বাইরে বসালে ভিতরের কোনো page/component Redux store access করতে পারবে না।
 
 ---
 
@@ -130,19 +130,23 @@ const router = createBrowserRouter([
 export default router;
 ```
 
+Child route-এর `path`-এর শুরুতে `/` দিতে হয় না — parent-এর path-এর সাথে নিজে থেকেই জুড়ে যায়। তাই এখানে final URL হবে `/tasks` আর `/users`।
+
 ---
 
-## `index: true` দিয়ে Default Page ঠিক করা
+## `index: true` দিয়ে Default (Home) Page ঠিক করা
 
 ```tsx
 const router = createBrowserRouter([
 	{
-		// path: "/",
-		Component: App,
+		Component: App, // path নেই → এটা শুধু একটা layout route
 		children: [
 			{
-				// path: "tasks",
-				index: true,
+				index: true, // "/" এ গেলে Task দেখাবে
+				Component: Task,
+			},
+			{
+				path: "tasks", // "/tasks" এ গেলেও Task দেখাবে
 				Component: Task,
 			},
 			{
@@ -154,7 +158,9 @@ const router = createBrowserRouter([
 ]);
 ```
 
-`index: true` দিলে সেই route-টাই হয়ে যায় parent path (`/`)-এর **default/home** page। তাই `/` এ গেলে layout (Navbar ইত্যাদি)-সহ `Task` page-টা load হবে।
+- **`index: true`** দিলে সেই route-টাই হয়ে যায় parent-এর **default/home** page। তাই `/` এ গেলে layout (Navbar ইত্যাদি)-সহ `Task` page load হবে।
+- অনেক সময় আমরা চাই — home page (`/`)-এ যেই page দেখাচ্ছে, সেটা তার নিজের URL (`/tasks`)-এও পাওয়া যাক। তখন `index: true` route-এর পাশাপাশি `path: "tasks"` দিয়ে একই `Task` component আরেকবার যোগ করতে হয়। এতে `/` আর `/tasks` — দুই জায়গাতেই `Task` page দেখাবে।
+- Parent route-এ `path` না দিলে সেটাকে বলে **layout route** — এর নিজের কোনো URL থাকে না, এটা শুধু children-দের চারপাশে layout (Navbar, Footer) দেওয়ার কাজ করে। তাই children-দের URL হবে সরাসরি `/`, `/tasks`, `/users`।
 
 ---
 
@@ -189,3 +195,5 @@ export default App;
 
 - **`Link`** → শুধু page navigate করে, কোনো extra styling দেয় না।
 - **`NavLink`** → `Link`-এর মতোই কাজ করে, কিন্তু এর সাথে বাড়তি সুবিধা হলো — কোন link-টা এখন **active** (বর্তমান page), সেটা বুঝে নিজে থেকেই একটা `active` class যোগ করে দেয়, ফলে active menu item আলাদা style দেওয়া সহজ হয়।
+
+> **ছোট Tip:** `<NavLink to="/">` সব page-এই active দেখাবে, কারণ সব URL-ই `/` দিয়ে শুরু হয়। এটা ঠিক করতে `end` prop দিতে হয়: `<NavLink to="/" end>Home</NavLink>` — তখন শুধু ঠিক `/`-এ থাকলেই active হবে।
