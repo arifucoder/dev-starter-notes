@@ -637,7 +637,8 @@ export default Task;
 - **User যোগ করা:** ঠিক task এর মতোই একইভাবে একটা `user` slice বানিয়ে, প্রতিটা task এর সাথে একজন user (assignee) যুক্ত করার ফিচার (যেমন `ITask` এ `assignedTo: string` যোগ করে) — নিজে করে দেখার জন্য রাখা হলো।
 
 ---
-
+Full source code: [redux-todos](https://github.com/arifucoder/redux-todos)
+--
 ## সংক্ষেপে — পুরো ফ্লো
 
 1. **Slice বানানো** → state আর initial data ঠিক করা।
