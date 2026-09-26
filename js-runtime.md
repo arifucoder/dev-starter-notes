@@ -2,9 +2,8 @@
 
 এই পুরো ব্যবস্থাটাকে বলে **JavaScript runtime**। এতে মোট ৬টা অংশ আছে, তিনটা "এলাকায়" ভাগ করা।
 
-![JavaScript runtime-এর অংশগুলো](./js-runtime.png)
+![JavaScript runtime-এর অংশগুলো](./js_runtime_parts.png)
 
-> ছবিটা দেখতে `js-runtime.svg` ফাইলটা এই `.md` ফাইলের একই ফোল্ডারে রাখতে হবে।
 
 ## JS engine (যেমন V8) এর ভেতরে দুটো জিনিস
 
